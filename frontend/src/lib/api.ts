@@ -6,8 +6,22 @@ import axios from 'axios';
 // resolve to the client's own machine and fail. Matches the pattern already
 // used by the standalone KDS client (kds-standalone/page.tsx), which works
 // correctly over LAN today for the same reason.
+// In development mode (frontend dev server on port 3000), use NEXT_PUBLIC_API_URL
+// to point to the backend on port 3001, otherwise the frontend tries to call
+// APIs on port 3000 which returns 404s.
+const getBaseURL = () => {
+  if (typeof window === 'undefined') return '/api';
+  
+  // In development, use the API URL from env var if set
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (apiUrl) return `${apiUrl}/api`;
+  
+  // Otherwise derive from current origin (production/LAN)
+  return `${window.location.origin}/api`;
+};
+
 const api = axios.create({
-  baseURL: typeof window !== 'undefined' ? `${window.location.origin}/api` : '/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
