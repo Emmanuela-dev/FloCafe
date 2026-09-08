@@ -8,7 +8,9 @@ const http = require('http');
 
 const setupData = {
   name: 'Admin',
-  password: 'admin123',  // Change this to a secure password
+  email: 'admin@test.local',
+  password: 'Admin123',  // Change this to a secure password
+  master_pin: '1234',  // 4-digit Master PIN for recovery
   business_type: 'restaurant',
   setup_profile: 'demo',  // Creates demo data (categories, products, etc.)
   service_model: 'finedine',  // or 'qsr' for quick service

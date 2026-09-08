@@ -179,3 +179,4 @@
 2026-08-12T06:43:15.249849Z  INFO get_globs: tailwindcss_oxide::scanner: enter
 2026-08-12T06:43:15.249896Z  INFO get_globs:discover_sources: tailwindcss_oxide::scanner: enter
 2026-08-12T06:43:15.249912Z  INFO get_globs:discover_sources: tailwindcss_oxide::scanner: exit
+2026-08-12T06:43:15.336282Z  INFO get_globs: tailwindcss_oxide::scanner: exit

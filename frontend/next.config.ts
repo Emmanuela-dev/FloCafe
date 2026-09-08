@@ -28,6 +28,7 @@ const nextConfig: NextConfig = {
       '@countries': '../main/countries.ts',
     },
   },
+
 };
 
 export default nextConfig;
