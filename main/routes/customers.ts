@@ -69,7 +69,11 @@ router.get('/', requireRole('owner', 'manager', 'cashier', 'waiter'), (req: Requ
         COALESCE((SELECT SUM(ll.amount) FROM loyalty_ledger ll WHERE ll.customer_id = c.id AND ll.type = 'credit'), 0) -
         COALESCE((SELECT SUM(ll.amount) FROM loyalty_ledger ll WHERE ll.customer_id = c.id AND ll.type = 'debit'), 0)
       ) as wallet_balance,
-      (SELECT MAX(created_at) FROM orders o WHERE o.customer_id = c.id) as last_visit_at
+      (SELECT MAX(created_at) FROM orders o WHERE o.customer_id = c.id) as last_visit_at,
+      (SELECT COUNT(*) FROM orders o WHERE o.customer_id = c.id AND DATE(o.created_at) = DATE('now')) as orders_today,
+      (SELECT SUM(b.paid_amount) FROM bills b 
+       JOIN orders o ON b.order_id = o.id 
+       WHERE o.customer_id = c.id AND b.payment_status = 'paid') as total_paid
       FROM customers c WHERE c.is_active = 1`;
     const params: any[] = [];
 
@@ -124,11 +128,74 @@ router.get('/:id', requireRole('owner', 'manager', 'cashier', 'waiter'), (req: R
       SELECT * FROM loyalty_ledger WHERE customer_id = ? ORDER BY created_at DESC LIMIT 50
     `).all(req.params.id);
 
-    const recentOrders = db.prepare(`
-      SELECT * FROM orders WHERE customer_id = ? ORDER BY created_at DESC LIMIT 10
+    // Enhanced order history with payment details
+    const orderHistory = db.prepare(`
+      SELECT 
+        o.id as order_id,
+        o.order_number,
+        o.type as order_type,
+        o.status,
+        o.subtotal,
+        o.tax_amount,
+        o.discount_amount,
+        o.total as order_total,
+        o.guest_count,
+        o.special_instructions,
+        o.created_at as order_date,
+        o.completed_at,
+        o.served_at,
+        b.id as bill_id,
+        b.bill_number,
+        b.payment_status,
+        b.paid_amount,
+        b.payment_details,
+        b.paid_at,
+        u.name as served_by
+      FROM orders o
+      LEFT JOIN bills b ON b.order_id = o.id
+      LEFT JOIN users u ON o.user_id = u.id
+      WHERE o.customer_id = ?
+      ORDER BY o.created_at DESC
+      LIMIT 50
     `).all(req.params.id);
 
-    res.json({ customer: { ...customer, walletBalance, loyaltyHistory, recentOrders } });
+    // Parse payment details JSON
+    const parsedOrderHistory = orderHistory.map((order: any) => {
+      let paymentMethods = [];
+      if (order.payment_details) {
+        try {
+          paymentMethods = JSON.parse(order.payment_details);
+        } catch (e) {
+          // Invalid JSON, leave empty
+        }
+      }
+      return {
+        ...order,
+        payment_methods: paymentMethods
+      };
+    });
+
+    // Get order statistics
+    const stats = db.prepare(`
+      SELECT 
+        COUNT(DISTINCT o.id) as total_orders,
+        COALESCE(SUM(o.total), 0) as lifetime_value,
+        COALESCE(AVG(o.total), 0) as average_order_value,
+        MAX(o.created_at) as last_order_date,
+        MIN(o.created_at) as first_order_date
+      FROM orders o
+      WHERE o.customer_id = ?
+    `).get(req.params.id) as any;
+
+    res.json({ 
+      customer: { 
+        ...customer, 
+        walletBalance, 
+        loyaltyHistory, 
+        orderHistory: parsedOrderHistory,
+        stats
+      } 
+    });
   } catch (error: any) {
     console.error("[API] Internal error:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -150,6 +217,72 @@ router.get('/:id/wallet', requireRole('owner', 'manager', 'cashier', 'waiter'), 
     `).all(customerId);
 
     res.json({ balance, transactions });
+  } catch (error: any) {
+    console.error("[API] Internal error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// New endpoint: Get complete order history with items
+router.get('/:id/orders', requireRole('owner', 'manager', 'cashier', 'waiter'), (req: Request, res: Response) => {
+  try {
+    const db = getDatabase();
+    const customerId = req.params.id as string;
+    
+    const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(customerId);
+    if (!customer) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    // Get all orders with full details
+    const orders = db.prepare(`
+      SELECT 
+        o.*,
+        b.bill_number,
+        b.payment_status,
+        b.paid_amount,
+        b.payment_details,
+        b.paid_at,
+        u.name as served_by_name,
+        u.email as served_by_email
+      FROM orders o
+      LEFT JOIN bills b ON b.order_id = o.id
+      LEFT JOIN users u ON o.user_id = u.id
+      WHERE o.customer_id = ?
+      ORDER BY o.created_at DESC
+    `).all(customerId) as any[];
+
+    // Get order items for each order
+    const ordersWithItems = orders.map(order => {
+      const items = db.prepare(`
+        SELECT 
+          oi.*,
+          p.name as product_name,
+          p.image_url as product_image
+        FROM order_items oi
+        LEFT JOIN products p ON oi.product_id = p.id
+        WHERE oi.order_id = ?
+        ORDER BY oi.id
+      `).all(order.id);
+
+      // Parse payment details
+      let paymentMethods = [];
+      if (order.payment_details) {
+        try {
+          paymentMethods = JSON.parse(order.payment_details);
+        } catch (e) {
+          // Invalid JSON
+        }
+      }
+
+      return {
+        ...order,
+        items,
+        payment_methods: paymentMethods
+      };
+    });
+
+    res.json({ orders: ordersWithItems });
   } catch (error: any) {
     console.error("[API] Internal error:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -230,6 +363,74 @@ router.post('/', requireRole('owner', 'manager', 'cashier', 'waiter'), (req: Req
   } catch (error: any) {
     console.error('[Customer POST error]', error);
     res.status(500).json({ message: 'Failed to create customer' });
+  }
+});
+
+// Quick lookup endpoint for guest checkout
+router.post('/find-or-create', requireRole('owner', 'manager', 'cashier', 'waiter'), (req: Request, res: Response) => {
+  try {
+    const { phone, name, email, address } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: 'Name is required' });
+    }
+
+    const db = getDatabase();
+
+    // If phone provided, check if customer exists
+    if (phone && phone.trim()) {
+      const tenantCountry = getSettingValue('country') || 'KE';
+      const parsed = parsePhoneE164(String(phone).trim(), tenantCountry);
+      
+      if (parsed) {
+        const phoneDigits = stripPhoneDigits(parsed.e164);
+        const existing = db.prepare('SELECT * FROM customers WHERE phone_digits = ? AND is_active = 1').get(phoneDigits) as any;
+        
+        if (existing) {
+          // Customer exists, return it
+          return res.json({ customer: existing, created: false });
+        }
+
+        // Create new customer with phone
+        const id = 'cust-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        db.prepare(`
+          INSERT INTO customers (id, phone, name, email, country_code, address, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          id,
+          parsed.e164,
+          String(name).trim(),
+          email ? String(email).trim() : null,
+          parsed.countryCode,
+          address ? String(address).trim() : null,
+          now(),
+          now()
+        );
+
+        const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(id);
+        return res.status(201).json({ customer, created: true });
+      }
+    }
+
+    // No phone or invalid phone - create customer with just name
+    const id = 'cust-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    db.prepare(`
+      INSERT INTO customers (id, name, email, address, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(
+      id,
+      String(name).trim(),
+      email ? String(email).trim() : null,
+      address ? String(address).trim() : null,
+      now(),
+      now()
+    );
+
+    const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(id);
+    res.status(201).json({ customer, created: true });
+  } catch (error: any) {
+    console.error('[Customer find-or-create error]', error);
+    res.status(500).json({ message: 'Failed to process customer' });
   }
 });
 

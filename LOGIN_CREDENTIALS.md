@@ -8,6 +8,10 @@ The system is currently running at: **http://localhost:3001**
 Your system now has **50 Kenyan menu items** across **14 categories** ready to use!
 See [CSV_IMPORT_GUIDE.md](CSV_IMPORT_GUIDE.md) for full details.
 
+### 🎉 NEW: Customer Order Tracking!
+Complete automatic tracking of customer orders with payment history, timestamps, and statistics!
+See [CUSTOMER_TRACKING_SUMMARY.md](CUSTOMER_TRACKING_SUMMARY.md) for full details.
+
 ## Available Users
 
 ### Owner/Admin Account
