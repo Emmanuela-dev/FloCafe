@@ -1,0 +1,51 @@
+id,sku,name,category,price,description,cost,tax_type,tax_rate,tax_category,tax_behavior,cashback_percent,tags,is_active
+,,Ugali,Main Dishes,150,Traditional maize meal served with stew,50,inclusive,16,,,0,"veg,local,bestseller",yes
+,,Nyama Choma,Main Dishes,450,Grilled meat (goat or beef),200,inclusive,16,,,0,"non_veg,bestseller",yes
+,,Sukuma Wiki,Vegetables,100,Braised collard greens with onions and tomatoes,30,inclusive,16,,,0,"veg,healthy",yes
+,,Irio,Vegetables,120,Mashed peas and potatoes with corn,40,inclusive,16,,,0,veg,yes
+,,Githeri,Main Dishes,130,Boiled maize and beans,45,inclusive,16,,,0,"veg,healthy",yes
+,,Mukimo,Vegetables,140,Mashed green vegetables with potatoes,50,inclusive,16,,,0,veg,yes
+,,Matoke,Main Dishes,160,Cooked green bananas in stew,60,inclusive,16,,,0,veg,yes
+,,Pilau,Main Dishes,250,Spiced rice with meat,100,inclusive,16,,,0,"non_veg,spicy",yes
+,,Chapati,Breads,40,Flatbread,15,inclusive,16,,,0,veg,yes
+,,Mandazi,Breads,30,Sweet fried dough,10,inclusive,16,,,0,"veg,sweet",yes
+,,Mahamri,Breads,35,Coastal coconut doughnut,12,inclusive,16,,,0,"veg,sweet",yes
+,,Samosa (Meat),Snacks,60,Fried pastry with spiced meat filling,25,inclusive,16,,,0,"non_veg,bestseller",yes
+,,Samosa (Veg),Snacks,50,Fried pastry with vegetable filling,20,inclusive,16,,,0,veg,yes
+,,Bhaji,Snacks,70,Potato and vegetable fritters,30,inclusive,16,,,0,veg,yes
+,,Viazi Karai,Snacks,80,Spiced potato crisps,35,inclusive,16,,,0,"veg,spicy",yes
+,,Fish Fry,Main Dishes,350,Crispy fried tilapia or Nile perch,150,inclusive,16,,,0,"non_veg,bestseller",yes
+,,Chicken Stew,Main Dishes,300,Tender chicken in tomato gravy,120,inclusive,16,,,0,non_veg,yes
+,,Beef Stew,Main Dishes,280,Slow-cooked beef in rich sauce,110,inclusive,16,,,0,non_veg,yes
+,,Kachumbari,Salads,80,Fresh tomato and onion salad,25,inclusive,16,,,0,"veg,healthy",yes
+,,Coconut Rice,Sides,100,Rice cooked in coconut milk,35,inclusive,16,,,0,veg,yes
+,,Chai ya Tangawizi,Hot Beverages,60,Ginger tea with milk,15,inclusive,16,,,0,"veg,hot",yes
+,,Chai ya Maziwa,Hot Beverages,50,Kenyan milk tea,12,inclusive,16,,,0,"veg,hot,bestseller",yes
+,,Kahawa,Hot Beverages,70,Strong African coffee,20,inclusive,16,,,0,"veg,hot",yes
+,,Madafu,Cold Beverages,100,Fresh coconut water,40,inclusive,16,,,0,"veg,cold,healthy",yes
+,,Passion Juice,Cold Beverages,120,Fresh passion fruit juice,45,inclusive,16,,,0,"veg,cold",yes
+,,Mango Juice,Cold Beverages,110,Fresh mango juice,40,inclusive,16,,,0,"veg,cold",yes
+,,Pineapple Juice,Cold Beverages,110,Fresh pineapple juice,40,inclusive,16,,,0,"veg,cold",yes
+,,Tamarind Juice (Ukwaju),Cold Beverages,100,Tangy tamarind drink,35,inclusive,16,,,0,"veg,cold",yes
+,,Stoney Tangawizi,Soft Drinks,80,Ginger-flavored soda,30,inclusive,16,,,0,"veg,cold",yes
+,,Fanta Orange,Soft Drinks,70,Orange flavored soda,25,inclusive,16,,,0,"veg,cold",yes
+,,Coca-Cola,Soft Drinks,70,Classic cola,25,inclusive,16,,,0,"veg,cold",yes
+,,Sprite,Soft Drinks,70,Lemon-lime soda,25,inclusive,16,,,0,"veg,cold",yes
+,,Tusker Beer,Alcoholic Beverages,200,Kenyan lager beer,80,inclusive,16,,,0,"cold,alcohol",yes
+,,White Cap Beer,Alcoholic Beverages,200,Premium lager,80,inclusive,16,,,0,"cold,alcohol",yes
+,,Konyagi,Alcoholic Beverages,150,Kenyan gin,60,inclusive,16,,,0,alcohol,yes
+,,Dawa Cocktail,Alcoholic Beverages,250,Honey vodka cocktail,100,inclusive,16,,,0,"alcohol,cocktail",yes
+,,Mandazi na Chai,Breakfast Combos,120,2 Mandazi with tea,35,inclusive,16,,,0,"veg,combo",yes
+,,Chapati na Dengu,Lunch Combos,180,Chapati with lentil stew,60,inclusive,16,,,0,"veg,combo",yes
+,,Nyama Choma Platter,Dinner Specials,650,Grilled meat with ugali and kachumbari,280,inclusive,16,,,0,"non_veg,combo",yes
+,,Fish & Chips,Lunch Combos,400,Fried fish with potato chips,170,inclusive,16,,,0,"non_veg,combo",yes
+,,Vegetarian Platter,Lunch Combos,320,Ugali with sukuma wiki and githeri,110,inclusive,16,,,0,"veg,combo,healthy",yes
+,,Mkate Mayai,Street Food,100,Egg-stuffed chapati,35,inclusive,16,,,0,non_veg,yes
+,,Smokies,Snacks,90,Smoked sausages,40,inclusive,16,,,0,non_veg,yes
+,,Chips Masala,Snacks,150,Spiced french fries,55,inclusive,16,,,0,"veg,spicy",yes
+,,Uji,Hot Beverages,50,Fermented porridge,15,inclusive,16,,,0,"veg,hot,healthy",yes
+,,Mutura,Street Food,120,Traditional blood sausage,50,inclusive,16,,,0,"non_veg,spicy",yes
+,,Chicken Pilau,Main Dishes,280,Spiced rice with chicken,115,inclusive,16,,,0,"non_veg,spicy",yes
+,,Mbuzi Fry,Main Dishes,500,Fried goat meat,220,inclusive,16,,,0,"non_veg,bestseller",yes
+,,Beef Pilau,Main Dishes,270,Spiced rice with beef,110,inclusive,16,,,0,"non_veg,spicy",yes
+,,Wali wa Nazi,Sides,110,Coconut rice,40,inclusive,16,,,0,veg,yes

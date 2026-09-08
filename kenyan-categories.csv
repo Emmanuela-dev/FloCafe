@@ -1,0 +1,15 @@
+name,description,color,icon,sort_order
+Main Dishes,Traditional Kenyan main courses and meals,red,🍽️,1
+Vegetables,Fresh vegetable dishes and sides,green,🥬,2
+Breads,Chapati and fried breads,amber,🍞,3
+Snacks,Quick bites and appetizers,orange,🥟,4
+Salads,Fresh salads and accompaniments,emerald,🥗,5
+Sides,Rice and other side dishes,yellow,🍚,6
+Hot Beverages,Tea and hot drinks,brown,☕,7
+Cold Beverages,Fresh juices and cold drinks,blue,🧃,8
+Soft Drinks,Sodas and carbonated drinks,cyan,🥤,9
+Alcoholic Beverages,Beer and spirits,purple,🍺,10
+Breakfast Combos,Morning meal combinations,pink,🌅,11
+Lunch Combos,Midday meal deals,lime,🍱,12
+Dinner Specials,Evening special meals,indigo,🌙,13
+Street Food,Popular Kenyan street food,slate,🛒,14

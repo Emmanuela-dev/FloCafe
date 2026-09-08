@@ -4,6 +4,10 @@
 
 The system is currently running at: **http://localhost:3001**
 
+### 🎉 NEW: Kenyan Menu Imported!
+Your system now has **50 Kenyan menu items** across **14 categories** ready to use!
+See [CSV_IMPORT_GUIDE.md](CSV_IMPORT_GUIDE.md) for full details.
+
 ## Available Users
 
 ### Owner/Admin Account
@@ -99,3 +103,76 @@ Then restart the server.
 
 ⚠️ **Important:** The default passwords and PIN are for development only. 
 In production, always use strong, unique passwords and PINs.
+
+---
+
+## CSV Import & Image Management
+
+### Quick Import Kenyan Menu
+```bash
+node import-kenyan-menu.js
+```
+
+### Add Images to Products
+
+**Option 1: From local files**
+1. Create an `images/` folder
+2. Add product photos (name them after products: "Ugali.jpg", "Chapati.png", etc.)
+3. Run: `node add-product-images.js`
+
+**Option 2: From URLs**
+1. Edit `add-images-from-urls.js` with your image URLs
+2. Run: `node add-images-from-urls.js`
+
+**Option 3: Via Frontend UI**
+1. Go to http://localhost:3001/menu
+2. Click on any product
+3. Upload image directly
+
+### Full CSV & Image Guide
+See [CSV_IMPORT_GUIDE.md](CSV_IMPORT_GUIDE.md) for:
+- CSV format reference
+- Import/export instructions
+- Image specifications
+- Troubleshooting tips
+- Bulk operations
+
+---
+
+## Available Scripts
+
+### User Management
+- `node check-users.js` - List all users
+- `node reset-password.js <email> <password>` - Reset user password
+- `node set-master-pin.js <4-digit-pin>` - Set/change Master PIN
+
+### Menu Management
+- `node import-kenyan-menu.js` - Import Kenyan menu from CSV
+- `node add-product-images.js` - Add images from local files
+- `node add-images-from-urls.js` - Add images from URLs
+
+### System
+- `node dev-server.js` - Start backend server
+- `npm run dev` - Start full Electron app
+- `npm run clean` - Kill ports 3001 & 3002
+
+---
+
+## Files Created
+
+### Documentation
+- `LOGIN_CREDENTIALS.md` - This file
+- `CSV_IMPORT_GUIDE.md` - Complete CSV import documentation
+
+### Data Files
+- `kenyan-categories.csv` - 14 Kenyan food categories
+- `kenyan-menu.csv` - 50 Kenyan menu items with prices
+
+### Scripts
+- `check-users.js` - View database users
+- `reset-password.js` - Reset any user's password
+- `set-master-pin.js` - Set Master PIN
+- `import-kenyan-menu.js` - Automated CSV import
+- `add-product-images.js` - Bulk image upload from files
+- `add-images-from-urls.js` - Bulk image upload from URLs
+- `check-schema.js` - View database schema
