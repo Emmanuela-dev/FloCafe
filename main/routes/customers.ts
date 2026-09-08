@@ -114,6 +114,95 @@ router.get('/', requireRole('owner', 'manager', 'cashier', 'waiter'), (req: Requ
   }
 });
 
+// Specific routes MUST come before /:id to avoid being caught by the generic route
+router.get('/:id/wallet', requireRole('owner', 'manager', 'cashier', 'waiter'), (req: Request, res: Response) => {
+  try {
+    const db = getDatabase();
+    const customerId = req.params.id as string;
+    const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(customerId);
+    if (!customer) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    const balance = getWalletBalance(customerId);
+    const transactions = db.prepare(`
+      SELECT * FROM loyalty_ledger WHERE customer_id = ? ORDER BY created_at DESC LIMIT 100
+    `).all(customerId);
+
+    res.json({ balance, transactions });
+  } catch (error: any) {
+    console.error("[API] Internal error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get complete order history with items - MUST be before /:id route
+router.get('/:id/orders', requireRole('owner', 'manager', 'cashier', 'waiter'), (req: Request, res: Response) => {
+  try {
+    const db = getDatabase();
+    const customerId = req.params.id as string;
+    
+    const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(customerId);
+    if (!customer) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    // Get all orders with full details
+    const orders = db.prepare(`
+      SELECT 
+        o.*,
+        b.bill_number,
+        b.payment_status,
+        b.paid_amount,
+        b.payment_details,
+        b.paid_at,
+        u.name as served_by_name,
+        u.email as served_by_email
+      FROM orders o
+      LEFT JOIN bills b ON b.order_id = o.id
+      LEFT JOIN users u ON o.user_id = u.id
+      WHERE o.customer_id = ?
+      ORDER BY o.created_at DESC
+    `).all(customerId) as any[];
+
+    // Get order items for each order
+    const ordersWithItems = orders.map(order => {
+      const items = db.prepare(`
+        SELECT 
+          oi.*,
+          p.name as product_name,
+          p.image_url as product_image
+        FROM order_items oi
+        LEFT JOIN products p ON oi.product_id = p.id
+        WHERE oi.order_id = ?
+        ORDER BY oi.id
+      `).all(order.id);
+
+      // Parse payment details
+      let paymentMethods = [];
+      if (order.payment_details) {
+        try {
+          paymentMethods = JSON.parse(order.payment_details);
+        } catch (e) {
+          // Invalid JSON
+        }
+      }
+
+      return {
+        ...order,
+        items,
+        payment_methods: paymentMethods
+      };
+    });
+
+    res.json({ orders: ordersWithItems });
+  } catch (error: any) {
+    console.error("[API] Internal error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Generic /:id route - MUST come AFTER specific routes like /:id/wallet and /:id/orders
 router.get('/:id', requireRole('owner', 'manager', 'cashier', 'waiter'), (req: Request, res: Response) => {
   try {
     const db = getDatabase();
@@ -196,93 +285,6 @@ router.get('/:id', requireRole('owner', 'manager', 'cashier', 'waiter'), (req: R
         stats
       } 
     });
-  } catch (error: any) {
-    console.error("[API] Internal error:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-router.get('/:id/wallet', requireRole('owner', 'manager', 'cashier', 'waiter'), (req: Request, res: Response) => {
-  try {
-    const db = getDatabase();
-    const customerId = req.params.id as string;
-    const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(customerId);
-    if (!customer) {
-      return res.status(404).json({ error: 'Customer not found' });
-    }
-
-    const balance = getWalletBalance(customerId);
-    const transactions = db.prepare(`
-      SELECT * FROM loyalty_ledger WHERE customer_id = ? ORDER BY created_at DESC LIMIT 100
-    `).all(customerId);
-
-    res.json({ balance, transactions });
-  } catch (error: any) {
-    console.error("[API] Internal error:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// New endpoint: Get complete order history with items
-router.get('/:id/orders', requireRole('owner', 'manager', 'cashier', 'waiter'), (req: Request, res: Response) => {
-  try {
-    const db = getDatabase();
-    const customerId = req.params.id as string;
-    
-    const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(customerId);
-    if (!customer) {
-      return res.status(404).json({ error: 'Customer not found' });
-    }
-
-    // Get all orders with full details
-    const orders = db.prepare(`
-      SELECT 
-        o.*,
-        b.bill_number,
-        b.payment_status,
-        b.paid_amount,
-        b.payment_details,
-        b.paid_at,
-        u.name as served_by_name,
-        u.email as served_by_email
-      FROM orders o
-      LEFT JOIN bills b ON b.order_id = o.id
-      LEFT JOIN users u ON o.user_id = u.id
-      WHERE o.customer_id = ?
-      ORDER BY o.created_at DESC
-    `).all(customerId) as any[];
-
-    // Get order items for each order
-    const ordersWithItems = orders.map(order => {
-      const items = db.prepare(`
-        SELECT 
-          oi.*,
-          p.name as product_name,
-          p.image_url as product_image
-        FROM order_items oi
-        LEFT JOIN products p ON oi.product_id = p.id
-        WHERE oi.order_id = ?
-        ORDER BY oi.id
-      `).all(order.id);
-
-      // Parse payment details
-      let paymentMethods = [];
-      if (order.payment_details) {
-        try {
-          paymentMethods = JSON.parse(order.payment_details);
-        } catch (e) {
-          // Invalid JSON
-        }
-      }
-
-      return {
-        ...order,
-        items,
-        payment_methods: paymentMethods
-      };
-    });
-
-    res.json({ orders: ordersWithItems });
   } catch (error: any) {
     console.error("[API] Internal error:", error);
     res.status(500).json({ error: "Internal server error" });
