@@ -564,10 +564,17 @@ router.post('/recover-password', authRateLimit(), (req: Request, res: Response) 
       return res.status(pinResult.status).json({ error: pinResult.error });
     }
 
-    const user = db.prepare('SELECT * FROM users WHERE email = ? AND role = ? AND is_active = 1')
-      .get(email, INITIAL_ADMIN_ROLE) as any;
+    // Allow password recovery for owner and manager roles (admin accounts)
+    const user = db.prepare('SELECT * FROM users WHERE email = ? AND is_active = 1')
+      .get(email) as any;
+    
     if (!user) {
-      return res.status(404).json({ error: 'No active owner account found with that email on this install' });
+      return res.status(404).json({ error: 'No active account found with that email. Please check the email address and try again.' });
+    }
+    
+    // Only allow recovery for administrative roles (owner, manager)
+    if (user.role !== 'owner' && user.role !== 'manager') {
+      return res.status(403).json({ error: 'Password recovery is only available for owner and manager accounts. Contact your administrator to reset your password.' });
     }
 
     const hashedPassword = bcrypt.hashSync(new_password, 10);
@@ -582,7 +589,7 @@ router.post('/recover-password', authRateLimit(), (req: Request, res: Response) 
       last_password_recovery_at: now(),
       last_password_recovery_email: email,
     });
-    console.warn(`[Auth] Password recovery: owner password for ${email} was reset locally via Master PIN`);
+    console.warn(`[Auth] Password recovery: ${user.role} password for ${email} was reset locally via Master PIN`);
 
     res.json({ message: 'Password reset successfully. You can now log in with your new password.' });
   } catch (error: any) {

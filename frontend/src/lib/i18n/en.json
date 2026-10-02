@@ -21,7 +21,7 @@
   "auth.recoverErrorGeneric": "Recovery failed. Please try again.",
   "auth.recoverNewPasswordLabel": "New Password",
   "auth.recoverNewPasswordPlaceholder": "Enter a new password",
-  "auth.recoverNoOwner": "No active owner account found with that email on this install.",
+  "auth.recoverNoOwner": "No active account found with that email. Please check the email address and try again.",
   "auth.recoverPasswordMismatch": "Passwords do not match",
   "auth.recoverPasswordRequirements": "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.",
   "auth.recoverPinFormat": "Enter the 4-digit Master PIN set up for this install.",
